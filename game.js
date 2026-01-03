@@ -4,11 +4,15 @@ const GAME_HEIGHT = 600;
 const HOLE_ROWS = 3;
 const HOLE_COLS = 3;
 const GAME_DURATION = 30;
-const FROG_SHOW_TIME_MIN = 800;
-const FROG_SHOW_TIME_MAX = 2000;
-const SPAWN_INTERVAL_MIN = 600;
-const SPAWN_INTERVAL_MAX = 1500;
 const SPAWN_DURATION = 500;
+
+// Configurable settings (defaults)
+let gameConfig = {
+  showTimeMin: 1000,
+  showTimeMax: 1000,
+  spawnIntervalMin: 1000,
+  spawnIntervalMax: 1000,
+};
 
 // Game State
 let score = 0;
@@ -17,6 +21,7 @@ let timeLeft = GAME_DURATION;
 let gameRunning = false;
 let holes = [];
 let app;
+let timerInterval = null;
 
 // Sound
 const whackSound = new Audio("assets/sounds/frog-croak.mp3");
@@ -27,6 +32,42 @@ function playWhackSound() {
   const sound = whackSound.cloneNode();
   sound.volume = 0.5;
   sound.play().catch(() => {}); // Ignore autoplay errors
+}
+
+// Apply game configuration from settings panel
+function applyGameConfig(config) {
+  gameConfig = { ...gameConfig, ...config };
+  restartGame();
+}
+
+// Restart the game with current config
+function restartGame() {
+  // Stop current game
+  gameRunning = false;
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+
+  // Clear all frogs
+  holes.forEach((hole) => {
+    if (hole.frogSprite) {
+      app.stage.removeChild(hole.frogSprite);
+      hole.frogSprite = null;
+      hole.hasFrog = false;
+    }
+  });
+
+  // Remove any overlays
+  const children = [...app.stage.children];
+  children.forEach((child) => {
+    if (child.isOverlay) {
+      app.stage.removeChild(child);
+    }
+  });
+
+  // Reset and start
+  startGame();
 }
 
 // Initialize PixiJS Application
@@ -206,10 +247,10 @@ function spawnFrog() {
     if (progress < 1) {
       requestAnimationFrame(popUp);
     } else {
-      // Start hide timer
+      // Start hide timer using config values
       const showTime =
-        FROG_SHOW_TIME_MIN +
-        Math.random() * (FROG_SHOW_TIME_MAX - FROG_SHOW_TIME_MIN);
+        gameConfig.showTimeMin +
+        Math.random() * (gameConfig.showTimeMax - gameConfig.showTimeMin);
       setTimeout(() => {
         if (hole.hasFrog && !frog.isWhacked) {
           hideFrog(hole, frog, true);
@@ -343,25 +384,28 @@ function startGame() {
   missed = 0;
   timeLeft = GAME_DURATION;
   updateScoreDisplay();
+  document.getElementById("timer").textContent = timeLeft;
 
   // Timer countdown
-  const timerInterval = setInterval(() => {
+  timerInterval = setInterval(() => {
     timeLeft--;
     document.getElementById("timer").textContent = timeLeft;
 
     if (timeLeft <= 0) {
       clearInterval(timerInterval);
+      timerInterval = null;
       endGame();
     }
   }, 1000);
 
-  // Spawn frogs at random intervals
+  // Spawn frogs at random intervals using config values
   const scheduleNextSpawn = () => {
     if (!gameRunning) return;
 
     const interval =
-      SPAWN_INTERVAL_MIN +
-      Math.random() * (SPAWN_INTERVAL_MAX - SPAWN_INTERVAL_MIN);
+      gameConfig.spawnIntervalMin +
+      Math.random() *
+        (gameConfig.spawnIntervalMax - gameConfig.spawnIntervalMin);
     setTimeout(() => {
       spawnFrog();
       scheduleNextSpawn();
@@ -371,7 +415,6 @@ function startGame() {
   // Start spawning
   spawnFrog();
   scheduleNextSpawn();
-  //   scheduleNextSpawn(); // Double spawn rate
 }
 
 // End the game
@@ -392,6 +435,7 @@ function endGame() {
   overlay.beginFill(0x000000, 0.7);
   overlay.drawRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
   overlay.endFill();
+  overlay.isOverlay = true;
   app.stage.addChild(overlay);
 
   // Game over text
@@ -407,6 +451,7 @@ function endGame() {
   gameOverText.anchor.set(0.5);
   gameOverText.x = GAME_WIDTH / 2;
   gameOverText.y = GAME_HEIGHT / 2 - 60;
+  gameOverText.isOverlay = true;
   app.stage.addChild(gameOverText);
 
   // Score text
@@ -419,6 +464,7 @@ function endGame() {
   scoreText.anchor.set(0.5);
   scoreText.x = GAME_WIDTH / 2;
   scoreText.y = GAME_HEIGHT / 2;
+  scoreText.isOverlay = true;
   app.stage.addChild(scoreText);
 
   // Restart button
@@ -430,6 +476,7 @@ function endGame() {
   restartBtn.y = GAME_HEIGHT / 2 + 70;
   restartBtn.eventMode = "static";
   restartBtn.cursor = "pointer";
+  restartBtn.isOverlay = true;
 
   const restartText = new PIXI.Text("PLAY AGAIN", {
     fontFamily: "Arial",

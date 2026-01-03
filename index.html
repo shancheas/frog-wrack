@@ -79,9 +79,312 @@
         font-size: 0.9rem;
         text-align: center;
       }
+
+      /* Config Menu Styles */
+      .config-toggle {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.5);
+        border: 2px solid #90ee90;
+        color: #90ee90;
+        padding: 10px 20px;
+        border-radius: 25px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        z-index: 100;
+      }
+
+      .config-toggle:hover {
+        background: #90ee90;
+        color: #1a472a;
+      }
+
+      .config-panel {
+        position: fixed;
+        top: 70px;
+        right: 20px;
+        background: rgba(20, 40, 20, 0.95);
+        border: 2px solid #90ee90;
+        border-radius: 15px;
+        padding: 20px;
+        width: 320px;
+        display: none;
+        z-index: 100;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      }
+
+      .config-panel.show {
+        display: block;
+        animation: slideIn 0.3s ease;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .config-title {
+        color: #90ee90;
+        font-size: 1.2rem;
+        margin-bottom: 15px;
+        text-align: center;
+        border-bottom: 1px solid rgba(144, 238, 144, 0.3);
+        padding-bottom: 10px;
+      }
+
+      .preset-section {
+        margin-bottom: 20px;
+      }
+
+      .preset-label {
+        color: #90ee90;
+        font-size: 0.85rem;
+        margin-bottom: 8px;
+        display: block;
+      }
+
+      .preset-buttons {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+      }
+
+      .preset-btn {
+        width: 45px;
+        height: 45px;
+        border: 2px solid #6b8e23;
+        background: rgba(107, 142, 35, 0.2);
+        color: white;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: bold;
+        transition: all 0.2s ease;
+      }
+
+      .preset-btn:hover {
+        background: rgba(107, 142, 35, 0.5);
+        transform: scale(1.1);
+      }
+
+      .preset-btn.active {
+        background: #6b8e23;
+        border-color: #90ee90;
+        box-shadow: 0 0 10px rgba(144, 238, 144, 0.5);
+      }
+
+      .config-section {
+        margin-bottom: 15px;
+      }
+
+      .config-label {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.8rem;
+        margin-bottom: 5px;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .config-value {
+        color: #ffd700;
+        font-weight: bold;
+      }
+
+      .slider-container {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .slider-container span {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.7rem;
+        min-width: 35px;
+      }
+
+      input[type="range"] {
+        flex: 1;
+        -webkit-appearance: none;
+        appearance: none;
+        height: 8px;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.2);
+        outline: none;
+      }
+
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #90ee90;
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        transition: transform 0.2s;
+      }
+
+      input[type="range"]::-webkit-slider-thumb:hover {
+        transform: scale(1.2);
+      }
+
+      input[type="range"]::-moz-range-thumb {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #90ee90;
+        cursor: pointer;
+        border: none;
+      }
+
+      .difficulty-indicator {
+        text-align: center;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid rgba(144, 238, 144, 0.3);
+      }
+
+      .difficulty-text {
+        color: #ffd700;
+        font-size: 0.9rem;
+      }
+
+      .apply-btn {
+        width: 100%;
+        padding: 12px;
+        margin-top: 15px;
+        background: linear-gradient(135deg, #6b8e23, #4a7c23);
+        border: none;
+        border-radius: 25px;
+        color: white;
+        font-size: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .apply-btn:hover {
+        background: linear-gradient(135deg, #7ba428, #5a8c33);
+        transform: scale(1.02);
+        box-shadow: 0 5px 15px rgba(107, 142, 35, 0.4);
+      }
     </style>
   </head>
   <body>
+    <button class="config-toggle" onclick="toggleConfig()">⚙️ Settings</button>
+
+    <div class="config-panel" id="configPanel">
+      <div class="config-title">🐸 Game Settings</div>
+
+      <div class="preset-section">
+        <span class="preset-label">Difficulty Presets</span>
+        <div class="preset-buttons">
+          <button class="preset-btn" onclick="applyPreset(1)">1</button>
+          <button class="preset-btn" onclick="applyPreset(2)">2</button>
+          <button class="preset-btn active" onclick="applyPreset(3)">3</button>
+          <button class="preset-btn" onclick="applyPreset(4)">4</button>
+          <button class="preset-btn" onclick="applyPreset(5)">5</button>
+        </div>
+      </div>
+
+      <div class="config-section">
+        <div class="config-label">
+          <span>Frog Show Time (Min)</span>
+          <span class="config-value" id="showMinValue">1000ms</span>
+        </div>
+        <div class="slider-container">
+          <span>500</span>
+          <input
+            type="range"
+            id="showTimeMin"
+            min="500"
+            max="2000"
+            value="1000"
+            step="100"
+            oninput="updateSlider('showMin')"
+          />
+          <span>2000</span>
+        </div>
+      </div>
+
+      <div class="config-section">
+        <div class="config-label">
+          <span>Frog Show Time (Max)</span>
+          <span class="config-value" id="showMaxValue">1000ms</span>
+        </div>
+        <div class="slider-container">
+          <span>500</span>
+          <input
+            type="range"
+            id="showTimeMax"
+            min="500"
+            max="2000"
+            value="1000"
+            step="100"
+            oninput="updateSlider('showMax')"
+          />
+          <span>2000</span>
+        </div>
+      </div>
+
+      <div class="config-section">
+        <div class="config-label">
+          <span>Spawn Interval (Min)</span>
+          <span class="config-value" id="spawnMinValue">1000ms</span>
+        </div>
+        <div class="slider-container">
+          <span>500</span>
+          <input
+            type="range"
+            id="spawnIntervalMin"
+            min="500"
+            max="2000"
+            value="1000"
+            step="100"
+            oninput="updateSlider('spawnMin')"
+          />
+          <span>2000</span>
+        </div>
+      </div>
+
+      <div class="config-section">
+        <div class="config-label">
+          <span>Spawn Interval (Max)</span>
+          <span class="config-value" id="spawnMaxValue">1000ms</span>
+        </div>
+        <div class="slider-container">
+          <span>500</span>
+          <input
+            type="range"
+            id="spawnIntervalMax"
+            min="500"
+            max="2000"
+            value="1000"
+            step="100"
+            oninput="updateSlider('spawnMax')"
+          />
+          <span>2000</span>
+        </div>
+      </div>
+
+      <div class="difficulty-indicator">
+        <span class="difficulty-text" id="difficultyText"
+          >Difficulty: Medium</span
+        >
+      </div>
+
+      <button class="apply-btn" onclick="applySettings()">
+        🎮 Apply & Restart
+      </button>
+    </div>
+
     <div class="game-wrapper">
       <h1>FROG WHACK!</h1>
       <div class="score-board">
@@ -104,5 +407,163 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.3.2/pixi.min.js"></script>
     <script src="game.js"></script>
+    <script>
+      // Toggle config panel
+      function toggleConfig() {
+        const panel = document.getElementById("configPanel");
+        panel.classList.toggle("show");
+      }
+
+      // Update slider display values
+      function updateSlider(type) {
+        const sliders = {
+          showMin: { slider: "showTimeMin", display: "showMinValue" },
+          showMax: { slider: "showTimeMax", display: "showMaxValue" },
+          spawnMin: { slider: "spawnIntervalMin", display: "spawnMinValue" },
+          spawnMax: { slider: "spawnIntervalMax", display: "spawnMaxValue" },
+        };
+
+        const config = sliders[type];
+        const value = document.getElementById(config.slider).value;
+        document.getElementById(config.display).textContent = value + "ms";
+
+        // Clear preset selection when manually adjusting
+        document
+          .querySelectorAll(".preset-btn")
+          .forEach((btn) => btn.classList.remove("active"));
+        updateDifficultyText();
+      }
+
+      // Calculate and update difficulty text
+      function updateDifficultyText() {
+        const showMin = parseInt(document.getElementById("showTimeMin").value);
+        const showMax = parseInt(document.getElementById("showTimeMax").value);
+        const spawnMin = parseInt(
+          document.getElementById("spawnIntervalMin").value
+        );
+        const spawnMax = parseInt(
+          document.getElementById("spawnIntervalMax").value
+        );
+
+        // Calculate difficulty score (lower values = harder)
+        const avgShow = (showMin + showMax) / 2;
+        const avgSpawn = (spawnMin + spawnMax) / 2;
+        const diffScore = (avgShow + avgSpawn) / 2;
+
+        let difficulty, color;
+        if (diffScore <= 700) {
+          difficulty = "Insane 🔥";
+          color = "#ff4444";
+        } else if (diffScore <= 900) {
+          difficulty = "Hard 💪";
+          color = "#ff8844";
+        } else if (diffScore <= 1100) {
+          difficulty = "Medium ⚡";
+          color = "#ffd700";
+        } else if (diffScore <= 1400) {
+          difficulty = "Easy 🌱";
+          color = "#90ee90";
+        } else {
+          difficulty = "Relaxed 😌";
+          color = "#87ceeb";
+        }
+
+        const diffText = document.getElementById("difficultyText");
+        diffText.textContent = "Difficulty: " + difficulty;
+        diffText.style.color = color;
+      }
+
+      // Preset configurations (Level 1 = easiest, Level 5 = hardest)
+      const presets = {
+        1: {
+          showMin: 1800,
+          showMax: 2000,
+          spawnMin: 1800,
+          spawnMax: 2000,
+          name: "Relaxed 😌",
+        },
+        2: {
+          showMin: 1400,
+          showMax: 1800,
+          spawnMin: 1300,
+          spawnMax: 1700,
+          name: "Easy 🌱",
+        },
+        3: {
+          showMin: 1000,
+          showMax: 1000,
+          spawnMin: 1000,
+          spawnMax: 1000,
+          name: "Medium ⚡",
+        },
+        4: {
+          showMin: 700,
+          showMax: 1000,
+          spawnMin: 600,
+          spawnMax: 900,
+          name: "Hard 💪",
+        },
+        5: {
+          showMin: 500,
+          showMax: 700,
+          spawnMin: 500,
+          spawnMax: 700,
+          name: "Insane 🔥",
+        },
+      };
+
+      // Apply preset
+      function applyPreset(level) {
+        const preset = presets[level];
+
+        document.getElementById("showTimeMin").value = preset.showMin;
+        document.getElementById("showTimeMax").value = preset.showMax;
+        document.getElementById("spawnIntervalMin").value = preset.spawnMin;
+        document.getElementById("spawnIntervalMax").value = preset.spawnMax;
+
+        document.getElementById("showMinValue").textContent =
+          preset.showMin + "ms";
+        document.getElementById("showMaxValue").textContent =
+          preset.showMax + "ms";
+        document.getElementById("spawnMinValue").textContent =
+          preset.spawnMin + "ms";
+        document.getElementById("spawnMaxValue").textContent =
+          preset.spawnMax + "ms";
+
+        // Update active button
+        document.querySelectorAll(".preset-btn").forEach((btn, i) => {
+          btn.classList.toggle("active", i + 1 === level);
+        });
+
+        updateDifficultyText();
+      }
+
+      // Apply settings and restart game
+      function applySettings() {
+        const config = {
+          showTimeMin: parseInt(document.getElementById("showTimeMin").value),
+          showTimeMax: parseInt(document.getElementById("showTimeMax").value),
+          spawnIntervalMin: parseInt(
+            document.getElementById("spawnIntervalMin").value
+          ),
+          spawnIntervalMax: parseInt(
+            document.getElementById("spawnIntervalMax").value
+          ),
+        };
+
+        // Call game function to apply settings
+        if (typeof applyGameConfig === "function") {
+          applyGameConfig(config);
+        }
+
+        // Close panel
+        document.getElementById("configPanel").classList.remove("show");
+      }
+
+      // Initialize with default preset
+      document.addEventListener("DOMContentLoaded", () => {
+        applyPreset(3);
+      });
+    </script>
   </body>
 </html>
