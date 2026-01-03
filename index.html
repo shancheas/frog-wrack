@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Frog Whack!</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background: linear-gradient(
+          135deg,
+          #1a472a 0%,
+          #2d5a3d 50%,
+          #1a472a 100%
+        );
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        overflow: hidden;
+      }
+
+      .game-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+      }
+
+      h1 {
+        color: #90ee90;
+        text-shadow: 3px 3px 0px #2d5a3d, 5px 5px 10px rgba(0, 0, 0, 0.3);
+        font-size: 3rem;
+        letter-spacing: 4px;
+      }
+
+      .score-board {
+        display: flex;
+        gap: 40px;
+        background: rgba(0, 0, 0, 0.3);
+        padding: 15px 40px;
+        border-radius: 50px;
+        border: 3px solid #90ee90;
+      }
+
+      .score-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: white;
+      }
+
+      .score-label {
+        font-size: 0.9rem;
+        opacity: 0.8;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+      }
+
+      .score-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #ffd700;
+      }
+
+      #game-canvas {
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+      }
+
+      .instructions {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.9rem;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="game-wrapper">
+      <h1>FROG WHACK!</h1>
+      <div class="score-board">
+        <div class="score-item">
+          <span class="score-label">Score</span>
+          <span class="score-value" id="score">0</span>
+        </div>
+        <div class="score-item">
+          <span class="score-label">Time</span>
+          <span class="score-value" id="timer">30</span>
+        </div>
+        <div class="score-item">
+          <span class="score-label">Missed</span>
+          <span class="score-value" id="missed">0</span>
+        </div>
+      </div>
+      <canvas id="game-canvas"></canvas>
+      <p class="instructions">Tap the frogs before they hide! 🐸</p>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.3.2/pixi.min.js"></script>
+    <script src="game.js"></script>
+  </body>
+</html>
