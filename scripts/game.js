@@ -27,11 +27,71 @@ let timerInterval = null;
 const whackSound = new Audio("assets/sounds/frog-croak.mp3");
 whackSound.volume = 0.5;
 
+// Background music
+const bgMusic = new Audio("assets/sounds/backsound.mp3");
+bgMusic.loop = true;
+bgMusic.volume = 0.3;
+let isMuted = false;
+let musicStarted = false;
+
 // Play sound function (creates new instance for overlapping sounds)
 function playWhackSound() {
+  if (isMuted) return;
   const sound = whackSound.cloneNode();
   sound.volume = 0.5;
   sound.play().catch(() => {}); // Ignore autoplay errors
+}
+
+// Start background music (called on first user interaction)
+function startBackgroundMusic() {
+  if (musicStarted) return;
+  musicStarted = true;
+  if (!isMuted) {
+    bgMusic.play().catch(() => {});
+  }
+}
+
+// Toggle mute
+function toggleMute() {
+  isMuted = !isMuted;
+
+  if (isMuted) {
+    bgMusic.pause();
+  } else {
+    if (musicStarted) {
+      bgMusic.play().catch(() => {});
+    }
+  }
+
+  // Update button icon
+  const muteBtn = document.getElementById("muteBtn");
+  if (muteBtn) {
+    muteBtn.textContent = isMuted ? "🔇" : "🔊";
+    muteBtn.title = isMuted ? "Unmute" : "Mute";
+  }
+
+  // Save preference
+  localStorage.setItem("frogWhackMuted", isMuted);
+
+  return isMuted;
+}
+
+// Load mute preference
+function loadMutePreference() {
+  const saved = localStorage.getItem("frogWhackMuted");
+  if (saved === "true") {
+    isMuted = true;
+    const muteBtn = document.getElementById("muteBtn");
+    if (muteBtn) {
+      muteBtn.textContent = "🔇";
+      muteBtn.title = "Unmute";
+    }
+  }
+}
+
+// Get mute state
+function getMuteState() {
+  return isMuted;
 }
 
 // Apply game configuration from settings panel
@@ -86,9 +146,17 @@ async function initGame() {
     { alias: "ghost", src: "assets/ghost.png" },
   ]);
 
+  // Load mute preference
+  loadMutePreference();
+
   // Create the game
   createBackground();
   createHoles();
+
+  // Start music on first click anywhere
+  document.addEventListener("click", startBackgroundMusic, { once: true });
+  document.addEventListener("touchstart", startBackgroundMusic, { once: true });
+
   startGame();
 }
 

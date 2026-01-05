@@ -15,6 +15,7 @@ A fun and addictive whack-a-mole style game featuring cute frogs! Built with Pix
 - 🐸 **Cute Frog Characters** - Whack adorable frogs as they pop up from holes
 - 👻 **Ghost Animation** - Watch frogs turn into cute ghosts when whacked
 - 🔊 **Sound Effects** - Satisfying frog croak sound on each successful hit
+- 🎵 **Background Music** - Fun background music with mute toggle
 - ⚙️ **Customizable Settings** - Adjust game difficulty with configurable parameters
 - 🎯 **5 Difficulty Presets** - From Relaxed to Insane difficulty levels
 - 🌿 **Beautiful Yard Theme** - Green grass background with decorative flowers
@@ -76,15 +77,19 @@ Click the **⚙️ Settings** button to customize your game experience:
 
 ```
 holemole/
-├── index.html          # Main game page with UI and settings
-├── styles.css          # Game styles and UI styling
-├── game.js             # PixiJS game logic
-├── README.md           # This file
+├── index.html              # Main game page with UI
+├── README.md               # This file
+├── css/
+│   └── styles.css          # Game styles and UI styling
+├── scripts/
+│   ├── game.js             # PixiJS game logic
+│   └── settings.js         # Settings panel logic
 └── assets/
-    ├── frog.png        # Frog sprite
-    ├── ghost.png       # Ghost sprite (death effect)
+    ├── frog.png            # Frog sprite
+    ├── ghost.png           # Ghost sprite (death effect)
     ├── sounds/
-    │   └── frog-croak.mp3  # Whack sound effect
+    │   ├── frog-croak.mp3  # Whack sound effect
+    │   └── backsound.mp3   # Background music
     └── screenshots/
         └── Screenshot-1.png
 ```
