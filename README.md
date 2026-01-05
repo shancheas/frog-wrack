@@ -77,6 +77,7 @@ Click the **⚙️ Settings** button to customize your game experience:
 ```
 holemole/
 ├── index.html          # Main game page with UI and settings
+├── styles.css          # Game styles and UI styling
 ├── game.js             # PixiJS game logic
 ├── README.md           # This file
 └── assets/
