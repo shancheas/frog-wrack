@@ -4,7 +4,7 @@ A fun and addictive whack-a-mole style game featuring cute frogs! Built with Pix
 
 ## 🎮 Play Now
 
-**[👉 Play Frog Whack! on Netlify](https://kulkulkatak.netlify.app)**
+**[👉 Play Frog Whack! on Netlify](https://coolcoolattack.netlify.app)**
 
 ## 📸 Screenshot
 
@@ -54,8 +54,8 @@ Click the **⚙️ Settings** button to customize your game experience:
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/yourusername/holemole.git
-   cd holemole
+   git clone https://github.com/shancheas/frog-wrack.git
+   cd frog-wrack
    ```
 
 2. **Start a local server** (required for asset loading)
