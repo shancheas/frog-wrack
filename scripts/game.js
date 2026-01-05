@@ -47,7 +47,9 @@ function startBackgroundMusic() {
   if (musicStarted) return;
   musicStarted = true;
   if (!isMuted) {
-    bgMusic.play().catch(() => {});
+    bgMusic.play().catch((e) => {
+      console.error("Error playing background music:", e);
+    });
   }
 }
 
@@ -130,31 +132,242 @@ function restartGame() {
   startGame();
 }
 
+// Loading state
+let loadingElements = null;
+
 // Initialize PixiJS Application
 async function initGame() {
   app = new PIXI.Application({
     width: GAME_WIDTH,
     height: GAME_HEIGHT,
-    backgroundColor: 0x4a7c23,
+    backgroundColor: 0x1a472a,
     view: document.getElementById("game-canvas"),
     antialias: true,
   });
 
-  // Load assets
-  await PIXI.Assets.load([
-    { alias: "frog", src: "assets/frog.png" },
-    { alias: "ghost", src: "assets/ghost.png" },
-  ]);
+  // Show loading screen first
+  showLoadingScreen();
+
+  // Load assets with progress tracking
+  await loadAssetsWithProgress();
 
   // Load mute preference
   loadMutePreference();
 
-  // Create the game
+  // Create the game elements
   createBackground();
   createHoles();
 
-  // Show start menu instead of starting game immediately
+  // Hide loading screen and show start menu
+  hideLoadingScreen();
+
+  // Show start menu
   showStartMenu();
+}
+
+// Show loading screen
+function showLoadingScreen() {
+  const elements = {};
+
+  // Dark background
+  elements.bg = new PIXI.Graphics();
+  elements.bg.beginFill(0x1a472a);
+  elements.bg.drawRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+  elements.bg.endFill();
+  app.stage.addChild(elements.bg);
+
+  // Title
+  elements.title = new PIXI.Text("🐸 FROG WHACK!", {
+    fontFamily: "Arial",
+    fontSize: 42,
+    fill: 0x90ee90,
+    fontWeight: "bold",
+    dropShadow: true,
+    dropShadowColor: 0x000000,
+    dropShadowDistance: 3,
+  });
+  elements.title.anchor.set(0.5);
+  elements.title.x = GAME_WIDTH / 2;
+  elements.title.y = 180;
+  app.stage.addChild(elements.title);
+
+  // Loading text
+  elements.loadingText = new PIXI.Text("Loading...", {
+    fontFamily: "Arial",
+    fontSize: 20,
+    fill: 0xffffff,
+  });
+  elements.loadingText.anchor.set(0.5);
+  elements.loadingText.x = GAME_WIDTH / 2;
+  elements.loadingText.y = GAME_HEIGHT / 2 - 50;
+  app.stage.addChild(elements.loadingText);
+
+  // Progress bar background
+  const barWidth = 300;
+  const barHeight = 30;
+  const barX = (GAME_WIDTH - barWidth) / 2;
+  const barY = GAME_HEIGHT / 2;
+
+  elements.barBg = new PIXI.Graphics();
+  elements.barBg.beginFill(0x2d5a3d);
+  elements.barBg.drawRoundedRect(barX, barY, barWidth, barHeight, 15);
+  elements.barBg.endFill();
+  elements.barBg.lineStyle(3, 0x90ee90);
+  elements.barBg.drawRoundedRect(barX, barY, barWidth, barHeight, 15);
+  app.stage.addChild(elements.barBg);
+
+  // Progress bar fill
+  elements.barFill = new PIXI.Graphics();
+  app.stage.addChild(elements.barFill);
+
+  // Store bar dimensions for updates
+  elements.barWidth = barWidth;
+  elements.barHeight = barHeight;
+  elements.barX = barX;
+  elements.barY = barY;
+
+  // Percentage text
+  elements.percentText = new PIXI.Text("0%", {
+    fontFamily: "Arial",
+    fontSize: 16,
+    fill: 0xffd700,
+    fontWeight: "bold",
+  });
+  elements.percentText.anchor.set(0.5);
+  elements.percentText.x = GAME_WIDTH / 2;
+  elements.percentText.y = barY + barHeight + 25;
+  app.stage.addChild(elements.percentText);
+
+  // Tips text
+  elements.tipText = new PIXI.Text(
+    "💡 Tip: Tap frogs quickly for high scores!",
+    {
+      fontFamily: "Arial",
+      fontSize: 14,
+      fill: 0x90ee90,
+      fontStyle: "italic",
+    }
+  );
+  elements.tipText.anchor.set(0.5);
+  elements.tipText.x = GAME_WIDTH / 2;
+  elements.tipText.y = GAME_HEIGHT - 100;
+  app.stage.addChild(elements.tipText);
+
+  loadingElements = elements;
+}
+
+// Update loading progress
+function updateLoadingProgress(progress) {
+  if (!loadingElements) return;
+
+  const { barFill, barWidth, barHeight, barX, barY, percentText } =
+    loadingElements;
+
+  // Clear and redraw progress bar
+  barFill.clear();
+  barFill.beginFill(0x6b8e23);
+  const fillWidth = Math.max(0, (barWidth - 6) * progress);
+  barFill.drawRoundedRect(barX + 3, barY + 3, fillWidth, barHeight - 6, 12);
+  barFill.endFill();
+
+  // Update percentage text
+  percentText.text = `${Math.round(progress * 100)}%`;
+
+  // Add frog head indicator if loaded
+  if (loadingElements.frogHead) {
+    loadingElements.frogHead.x = barX + 3 + fillWidth;
+  }
+}
+
+// Load assets with progress
+async function loadAssetsWithProgress() {
+  const assets = [
+    { alias: "frog-head", src: "assets/frog-head.png" },
+    { alias: "frog", src: "assets/frog.png" },
+    { alias: "ghost", src: "assets/ghost.png" },
+  ];
+
+  // Add assets to loader
+  for (const asset of assets) {
+    PIXI.Assets.add(asset);
+  }
+
+  // Create a bundle
+  PIXI.Assets.addBundle("gameAssets", assets);
+
+  // First load the frog head for the progress indicator
+  await PIXI.Assets.load("frog-head");
+
+  // Create frog head indicator on progress bar
+  const frogHead = PIXI.Sprite.from("frog-head");
+  frogHead.anchor.set(0.5);
+  frogHead.scale.set(0.08);
+  frogHead.x = loadingElements.barX + 3;
+  frogHead.y = loadingElements.barY + loadingElements.barHeight / 2;
+  app.stage.addChild(frogHead);
+  loadingElements.frogHead = frogHead;
+
+  // Animate frog head
+  let bounceTime = 0;
+  const animateFrogHead = () => {
+    if (!loadingElements) return;
+    bounceTime += 0.1;
+    frogHead.rotation = Math.sin(bounceTime) * 0.2;
+    frogHead.scale.set(0.08 + Math.sin(bounceTime * 2) * 0.005);
+    requestAnimationFrame(animateFrogHead);
+  };
+  animateFrogHead();
+
+  // Load remaining assets with progress
+  let loadedCount = 1; // frog-head already loaded
+  const totalAssets = assets.length;
+
+  updateLoadingProgress(loadedCount / totalAssets);
+
+  // Simulate a bit of loading time for smooth progress
+  await simulateDelay(200);
+
+  for (let i = 1; i < assets.length; i++) {
+    await PIXI.Assets.load(assets[i].alias);
+    loadedCount++;
+    updateLoadingProgress(loadedCount / totalAssets);
+    await simulateDelay(150); // Small delay for visual feedback
+  }
+
+  // Load sounds
+  updateLoadingProgress(0.9);
+  loadingElements.loadingText.text = "Loading sounds...";
+
+  // Preload sounds
+  whackSound.load();
+  bgMusic.load();
+
+  await simulateDelay(300);
+
+  // Final progress
+  updateLoadingProgress(1);
+  loadingElements.loadingText.text = "Ready!";
+
+  await simulateDelay(500);
+}
+
+// Simulate delay for smooth loading
+function simulateDelay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// Hide loading screen
+function hideLoadingScreen() {
+  if (!loadingElements) return;
+
+  // Remove all loading elements
+  Object.values(loadingElements).forEach((element) => {
+    if (element && element.parent) {
+      app.stage.removeChild(element);
+    }
+  });
+
+  loadingElements = null;
 }
 
 // Show start menu
@@ -250,6 +463,7 @@ function showStartMenu() {
 
   // Play button click
   playBtn.on("pointerdown", () => {
+    console.log("pointerdown");
     // Start music on play
     startBackgroundMusic();
 
