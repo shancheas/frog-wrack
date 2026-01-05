@@ -153,11 +153,131 @@ async function initGame() {
   createBackground();
   createHoles();
 
-  // Start music on first click anywhere
-  document.addEventListener("click", startBackgroundMusic, { once: true });
-  document.addEventListener("touchstart", startBackgroundMusic, { once: true });
+  // Show start menu instead of starting game immediately
+  showStartMenu();
+}
 
-  startGame();
+// Show start menu
+function showStartMenu() {
+  // Semi-transparent overlay
+  const overlay = new PIXI.Graphics();
+  overlay.beginFill(0x000000, 0.6);
+  overlay.drawRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+  overlay.endFill();
+  overlay.isOverlay = true;
+  app.stage.addChild(overlay);
+
+  // Title text
+  const titleText = new PIXI.Text("🐸 FROG WHACK!", {
+    fontFamily: "Arial",
+    fontSize: 52,
+    fill: 0x90ee90,
+    fontWeight: "bold",
+    dropShadow: true,
+    dropShadowColor: 0x000000,
+    dropShadowDistance: 4,
+    dropShadowBlur: 4,
+  });
+  titleText.anchor.set(0.5);
+  titleText.x = GAME_WIDTH / 2;
+  titleText.y = 120;
+  titleText.isOverlay = true;
+  app.stage.addChild(titleText);
+
+  // Frog sprite in menu
+  const menuFrog = PIXI.Sprite.from("frog");
+  menuFrog.anchor.set(0.5);
+  menuFrog.x = GAME_WIDTH / 2;
+  menuFrog.y = GAME_HEIGHT / 2 - 30;
+  menuFrog.scale.set(0.25);
+  menuFrog.isOverlay = true;
+  app.stage.addChild(menuFrog);
+
+  // Animate the frog (bouncing)
+  let bounceTime = 0;
+  const animateFrog = () => {
+    if (!menuFrog.parent) return; // Stop if removed
+    bounceTime += 0.05;
+    menuFrog.y = GAME_HEIGHT / 2 - 30 + Math.sin(bounceTime) * 10;
+    menuFrog.rotation = Math.sin(bounceTime * 0.5) * 0.1;
+    requestAnimationFrame(animateFrog);
+  };
+  animateFrog();
+
+  // Instructions text
+  const instructionsText = new PIXI.Text("Tap the frogs before they hide!", {
+    fontFamily: "Arial",
+    fontSize: 18,
+    fill: 0xffffff,
+    fontWeight: "normal",
+  });
+  instructionsText.anchor.set(0.5);
+  instructionsText.x = GAME_WIDTH / 2;
+  instructionsText.y = GAME_HEIGHT / 2 + 80;
+  instructionsText.isOverlay = true;
+  app.stage.addChild(instructionsText);
+
+  // Play button
+  const playBtn = new PIXI.Graphics();
+  playBtn.beginFill(0x6b8e23);
+  playBtn.drawRoundedRect(-100, -30, 200, 60, 30);
+  playBtn.endFill();
+  playBtn.x = GAME_WIDTH / 2;
+  playBtn.y = GAME_HEIGHT / 2 + 160;
+  playBtn.eventMode = "static";
+  playBtn.cursor = "pointer";
+  playBtn.isOverlay = true;
+
+  const playText = new PIXI.Text("▶  PLAY", {
+    fontFamily: "Arial",
+    fontSize: 28,
+    fill: 0xffffff,
+    fontWeight: "bold",
+  });
+  playText.anchor.set(0.5);
+  playBtn.addChild(playText);
+
+  // Button hover effects
+  playBtn.on("pointerover", () => {
+    playBtn.tint = 0xaaffaa;
+    playBtn.scale.set(1.05);
+  });
+
+  playBtn.on("pointerout", () => {
+    playBtn.tint = 0xffffff;
+    playBtn.scale.set(1);
+  });
+
+  // Play button click
+  playBtn.on("pointerdown", () => {
+    // Start music on play
+    startBackgroundMusic();
+
+    // Remove all menu elements
+    app.stage.removeChild(overlay);
+    app.stage.removeChild(titleText);
+    app.stage.removeChild(menuFrog);
+    app.stage.removeChild(instructionsText);
+    app.stage.removeChild(playBtn);
+
+    // Start the game
+    startGame();
+  });
+
+  app.stage.addChild(playBtn);
+
+  // Add pulsing animation to play button
+  let pulseTime = 0;
+  const pulseButton = () => {
+    if (!playBtn.parent) return;
+    pulseTime += 0.03;
+    const scale = 1 + Math.sin(pulseTime) * 0.03;
+    if (playBtn.scale.x === 1 || playBtn.scale.x === scale) {
+      playBtn.scale.set(scale);
+    }
+    requestAnimationFrame(pulseButton);
+  };
+  pulseButton();
 }
 
 // Create yard-like background with grass texture
@@ -537,18 +657,18 @@ function endGame() {
 
   // Restart button
   const restartBtn = new PIXI.Graphics();
-  restartBtn.beginFill(0x4a7c23);
+  restartBtn.beginFill(0x6b8e23);
   restartBtn.drawRoundedRect(-80, -25, 160, 50, 25);
   restartBtn.endFill();
   restartBtn.x = GAME_WIDTH / 2;
-  restartBtn.y = GAME_HEIGHT / 2 + 70;
+  restartBtn.y = GAME_HEIGHT / 2 + 60;
   restartBtn.eventMode = "static";
   restartBtn.cursor = "pointer";
   restartBtn.isOverlay = true;
 
-  const restartText = new PIXI.Text("PLAY AGAIN", {
+  const restartText = new PIXI.Text("▶  PLAY AGAIN", {
     fontFamily: "Arial",
-    fontSize: 20,
+    fontSize: 18,
     fill: 0xffffff,
     fontWeight: "bold",
   });
@@ -556,22 +676,67 @@ function endGame() {
   restartBtn.addChild(restartText);
 
   restartBtn.on("pointerdown", () => {
-    app.stage.removeChild(overlay);
-    app.stage.removeChild(gameOverText);
-    app.stage.removeChild(scoreText);
-    app.stage.removeChild(restartBtn);
+    removeGameOverOverlay();
     startGame();
   });
 
   restartBtn.on("pointerover", () => {
-    restartBtn.tint = 0xcccccc;
+    restartBtn.tint = 0xaaffaa;
+    restartBtn.scale.set(1.05);
   });
 
   restartBtn.on("pointerout", () => {
     restartBtn.tint = 0xffffff;
+    restartBtn.scale.set(1);
   });
 
   app.stage.addChild(restartBtn);
+
+  // Menu button
+  const menuBtn = new PIXI.Graphics();
+  menuBtn.beginFill(0x4a5568);
+  menuBtn.drawRoundedRect(-80, -25, 160, 50, 25);
+  menuBtn.endFill();
+  menuBtn.x = GAME_WIDTH / 2;
+  menuBtn.y = GAME_HEIGHT / 2 + 125;
+  menuBtn.eventMode = "static";
+  menuBtn.cursor = "pointer";
+  menuBtn.isOverlay = true;
+
+  const menuText = new PIXI.Text("🏠  MENU", {
+    fontFamily: "Arial",
+    fontSize: 18,
+    fill: 0xffffff,
+    fontWeight: "bold",
+  });
+  menuText.anchor.set(0.5);
+  menuBtn.addChild(menuText);
+
+  menuBtn.on("pointerdown", () => {
+    removeGameOverOverlay();
+    showStartMenu();
+  });
+
+  menuBtn.on("pointerover", () => {
+    menuBtn.tint = 0xcccccc;
+    menuBtn.scale.set(1.05);
+  });
+
+  menuBtn.on("pointerout", () => {
+    menuBtn.tint = 0xffffff;
+    menuBtn.scale.set(1);
+  });
+
+  app.stage.addChild(menuBtn);
+
+  // Helper to remove game over overlay
+  function removeGameOverOverlay() {
+    app.stage.removeChild(overlay);
+    app.stage.removeChild(gameOverText);
+    app.stage.removeChild(scoreText);
+    app.stage.removeChild(restartBtn);
+    app.stage.removeChild(menuBtn);
+  }
 }
 
 // Initialize when page loads
